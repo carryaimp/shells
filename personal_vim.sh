@@ -22,7 +22,7 @@ personal_vim() {
     [ -d .vim/template ] || {
         mkdir .vim/template -p
     }
-    echo "#!/bin/sh\n" >> .vim/template/tmp.sh
+    echo "#!/bin/sh" >> .vim/template/tmp.sh
     echo "# author: beimenchuixue" >> .vim/template/tmp.sh
     echo "# email: 422083556@qq.com" >> .vim/template/tmp.sh
     echo "# blog: http://www.cnblogs.com/2bjiujiu/" >> .vim/template/tmp.sh
