@@ -134,7 +134,7 @@ jia
 }
 # go_setting_vitualenv
 
-person_virtualenv_alais() {
+person_virtualenv_alias() {
     sed -i "9i # only want to easy use and read\n\
 # you also can set what you like\n\
 alias mkenv='mkvirtualenv'\n\
@@ -156,7 +156,7 @@ beimenchuixue_main() {
     go_aliyun_pip
     go_install_vitualenv
     go_setting_vitualenv
-    person_virtualenv_alais
+    person_virtualenv_alias
 }
 
 beimenchuixue_main
