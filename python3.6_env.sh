@@ -6,7 +6,7 @@
 download_to="$HOME/tools"
 py_version="3.6.4"
 install_path="/application"
-yilai_bao="zlib-devel gcc gcc-c++"
+yilai_bao="zlib-devel gcc gcc-c++ openssl-devel sqlite-devel"
 env_path="/etc/profile"
 add_path="/application/python/bin"
 vitrualenv_path="$HOME/.pyenv"
@@ -56,7 +56,7 @@ jie_ya() {
 
 go_configure() {
     cd $download_to/Python-${py_version}
-    ./configure --enable-optimizations --prefix=${install_path}/Python-${py_version} &> /dev/null
+    ./configure --enable-optimizations --prefix=${install_path}/Python-${py_version} --with-ssl &> /dev/null
     sure_ok $? "python configure"  
 }
 # go_configure
