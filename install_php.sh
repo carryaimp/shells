@@ -5,8 +5,7 @@
 
 downloadPaht="$HOME/tools"
 installPath="/application"
-phpRelayPkg="zlib-devel libxml2-devel libjpeg-devel libjpeg-turbo-devel libiconv-devel freetype-devel libpng-devel gd-devel libcurl-devel libxslt-devel libmcrypt-devel mhash mcrypt
-"
+phpRelayPkg="zlib-devel libxml2-devel libjpeg-devel libjpeg-turbo-devel libiconv-devel freetype-devel libpng-devel gd-devel libcurl-devel libxslt-devel libmcrypt-devel mhash mcrypt openssl-devel"
 version="7.0.0"
 phpPkg="php-${version}"
 phpDownloadUrl="http://mirrors.sohu.com/php/${phpPkg}.tar.gz"
