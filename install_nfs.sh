@@ -8,7 +8,7 @@ nfsUser="nginx"
 allowIP="127.16.1.0/24"
 nfsConfPath="/etc/exports"
 nfsDataPath="/data"
-linuxVersion="$(awk -F "[ .]+" '{print $4}' /etc/redhat-release)"
+KernerVersion="uname -r | awk -F "[.]" '{print $1}'"
 
 . /etc/init.d/functions
 
@@ -51,7 +51,7 @@ function nfsConf {
 }
 # nfsConf
 function startRpcbind {
-    if [ $linuxVersion -eq 6 ]; then
+    if [ $KernerVersion -eq 2 ]; then
         /etc/init.d/rpcbind start
         sureOk $? "starRpcbind"
         chkconfig rpcbind on
@@ -66,7 +66,7 @@ function startRpcbind {
 # startRpcbind
 
 function startNfs {
-    if [ $linuxVersion -eq 6 ]; then
+    if [ $KernerVersion -eq 2 ]; then
         /etc/init.d/nfs start
         sureOk $? "startNfs"
         chkconfig nfs on &> /dev/null
