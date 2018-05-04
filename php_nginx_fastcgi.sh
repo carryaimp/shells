@@ -12,11 +12,13 @@ else
     exit 1
 fi
 
+. /etc/init.d/functions
+
 function sureOK {
     [ $1 -eq 0 ] && {
-        echo "$2 ok"
+        action "$2 is" /bin/true
     } || {
-        echo "$2 faile"
+        action "$2 is" /bin/false
     }
 }
 
@@ -71,8 +73,9 @@ EOF
 
 function startNginx {
     echo "$nginxPath/sbin/nginx" >> /etc/rc.local
-    $nginxPath/sbin/nginx -t
+    $nginxPath/sbin/nginx -t &> /dev/null
     sureOK $? "start nginx"
+    $nginxPath/sbin/nginx
 }
 # startNginx
 
@@ -83,11 +86,46 @@ function blogTest {
     localIp=$(ip a show dev eth0|awk -F "[ /]+" 'NR==3{print $3}')
     webStatus=`curl -I -m 10 -o /dev/null -s -w %{http_code} $localIp`
     [ $webStatus -eq 200 ] && {
-        sureOK 0 "blog work"
+        sureOK 0 "blog test"
     } || {
-        sureOK 1 "blog faile"
+        sureOK 1 "blog test"
     }
 }
-blogTest
+# blogTest
 
-# phpConfig
+function initPhpPage {
+cat >>$nginxPath/html/blog/mysql.php<<EOF
+<?php
+    \$mysqli = new mysqli("127.16.1.10", "beimenchuixue", "123456.", "beimenchuixue");
+    if(!\$mysqli)  {
+            echo "database error";
+    }else{
+            echo "php connect successful";
+    }
+    ?>
+EOF
+}
+# initPhpPage
+
+function testConnctionMysql {
+    localIp=$(ip a show dev eth0|awk -F "[ /]+" 'NR==3{print $3}')
+    output=`curl -s 10.0.0.9/mysql.php|grep successful|wc -l`
+    [ $output -eq 1 ] && {
+        sureOK 0 "testConnctionMysql"
+    } || {
+        sureOK 1 "testConnctionMysql"
+    }
+}
+# testConnctionMysql
+
+function main_beimenchuixue {
+    phpConf
+    startFastcgi
+    nginxConf
+    blogServer
+    startNginx
+    blogTest
+    initPhpPage
+    testConnctionMysql
+}
+main_beimenchuixue
