@@ -23,6 +23,12 @@ function sureOk {
     }
 }
 
+[ -d $downloadPaht ] || {
+    mkdir -p $downloadPaht
+    sureOk $? "init downloadPaht"
+}
+
+
 function installPhpRelayPkg {
     yum install -y $phpRelayPkg &> /dev/null
     sureOk $? "installPhpRelayPkg"
