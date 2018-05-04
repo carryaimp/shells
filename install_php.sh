@@ -115,7 +115,7 @@ function cpPhpConf {
    \cp $downloadPaht/${phpPkg}/php.ini-development $installPath/php/lib/php.ini
    sureOk $? "cpPhpConf"
 }
-cpPhpConf
+# cpPhpConf
 
 
 function installPhpEnv_beimenchuixue_main {
