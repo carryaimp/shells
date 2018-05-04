@@ -20,9 +20,9 @@ allowIP='172.16.1.%'
 
 function sureOk {
     [ "$1" -eq 0 ] && {
-        action "$1 is" /bin/true
+        action "$2 is" /bin/true
     } || {
-        action "$1 is" /bin/false
+        action "$2 is" /bin/false
         exit $1
     }
 }
