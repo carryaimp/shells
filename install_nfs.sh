@@ -88,9 +88,9 @@ function nfsTest {
 # nfsTest
 
 function main_beiMenChuiXue {
+    AddNfsUser
     initNfsDataPath
     installNfsRelayPkg
-    AddNfsUser
     nfsConf
     startRpcbind
     startNfs
