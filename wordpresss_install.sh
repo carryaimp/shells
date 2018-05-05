@@ -33,7 +33,7 @@ function sureOk {
 }
 
 function installNfsEnv {
-    yum install -y $nfsPkg
+    yum install -y $nfsPkg &> /dev/null
     sureOk $? "installNfsEnv"
 }
 
@@ -78,3 +78,12 @@ function wordpressNfsMount {
 }
 # wordpressNfsMount
 
+function main_beiMenChuiXue {
+    installNfsEnv
+    downloadWordpress
+    untarWordpress
+    installWordpress
+    wordpressNfsMount
+}
+
+main_beiMenChuiXue
