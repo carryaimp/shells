@@ -74,6 +74,17 @@ function startMaster {
     fi
 }
 
+function onbootMaster {
+    if [ $osVersion -eq 7 ]; then
+        systemctl enable salt-master &> /dev/null
+        sureOk $? "onbootMaster"
+    else
+        chkconfig salt-master on &> /dev/null
+        sureOk $? "onbootMaster"
+    fi
+}
+
+
 function MinionConf {
     sed -i "s/#master: salt/master: $masterIP/g" $minionConf
     sureOk $? "MinionConf"
@@ -89,17 +100,30 @@ function startMinion {
     fi
 }
 
+function onbootMinion {
+    if [ $osVersion -eq 7 ]; then
+        systemctl enable salt-minion &> /dev/null
+        sureOk $? "onbootMinion"
+    else
+        chkconfig salt-minion on &> /dev/null
+        sureOk $? "onbootMinion"
+    fi
+}
+
+
 case $1 in
     master)
     aliRepoInstall
     masterInstall
     startMaster
+    onbootMaster
     ;;
     minion)
     aliRepoInstall
     minionInstall
     MinionConf
     startMinion
+    onbootMinion
     ;;
     *)
     echo "$0  (master|minion)"
