@@ -3,18 +3,22 @@
 # email: 422083556@qq.com
 # blog: http://www.cnblogs.com/2bjiujiu/
 
-download_to="$HOME/tools"
-py_version="3.6.4"
-install_path="/application"
-yilai_bao="zlib-devel gcc gcc-c++ openssl-devel sqlite-devel"
-env_path="/etc/profile"
-add_path="/application/python/bin"
-vitrualenv_path="$HOME/.pyenv"
-user_env_path="$HOME/.bashrc"
+downloadPath="$HOME/tools"
+installPath="/application"
+pyBinPath="python/bin"
+pyVersion="3.6.4"
+pyPkgName="Python-${pyVersion}"
+pyDownloadUrl="https://www.python.org/ftp/python/${pyVersion}/${pyPkgName}.tgz"
+pyRelayPkg="zlib-devel gcc gcc-c++ openssl-devel sqlite-devel wget"
+pyVirtualPkg="virtualenvwrapper"
+
+globalPath="/etc/profile"
+vitrualEnvPath="$HOME/.pyenv"
+userBashConf="$HOME/.bashrc"
 
 . /etc/init.d/functions
 
-sure_ok() {
+function sureOK {
     [ $1 -eq 0 ] && {
         action "$2 is" /bin/true
     } || {
@@ -23,142 +27,124 @@ sure_ok() {
     }
 }
 
-install_yilai() {
-    yum install -y $yilai_bao
-    sure_ok $? "python yilai_bao install"
+[ -d $downloadPath ] || {
+    mkdir -p $downloadPath
+    sureOK $? "init downloadPath"
 }
-# install_yilai
 
-down_python() {
-    [ -d $download_to ] || {
-        mkdir $download_to -p
-        action "init download path is" /bin/true
-    }
-    cd $download_to
-    yum install -y wget &> /dev/null
-    echo "Foreign sities may be slow, please waitting"
-    wget -q https://www.python.org/ftp/python/${py_version}/Python-${py_version}.tgz &> /dev/null
-    sure_ok $? 'down python-$py_version'
+function pyRelayPkgInstall {
+    echo "yum install python ...ing"
+    yum install $pyRelayPkg &> /dev/null
+    sureOK $? "pyRelayPkgInstall"
 }
-# down_python
+#pass pyRelayPkgInstall 
 
-jie_ya() {
-    cd $download_to
-    [ -f Python-${py_version}.tgz ] && {
-        tar -xf Python-${py_version}.tgz
-    } || {
-        down_python
-        tar -xf Python-${py_version}.tgz
-    }
-    sure_ok $? "python jie ya"
+function downloadPyPkg {
+    cd $downloadPath
+    echo "dowbload python ...ing"
+    wget -q $pyDownloadUrl
+    sureOK $? "downloadPyPkg"
 }
-# jie_ya
+#pass downloadPyPkg
 
-go_configure() {
-    cd $download_to/Python-${py_version}
-    ./configure --enable-optimizations --prefix=${install_path}/Python-${py_version} --with-ssl &> /dev/null
-    sure_ok $? "python configure"  
+function untarPyPkg {
+    cd $downloadPath
+    tar -xf ${pyPkgName}.tgz
+    sureOK $? "untarPyPkg"
 }
-# go_configure
+#pass untarPyPkg
 
-go_make() {
-    cd $download_to/Python-${py_version}
-    echo "may be slow, please wait..."
+function pyConfigure {
+    cd $downloadPath/$pyPkgName
+    ./configure --enable-optimizations --prefix=$installPath/$pyPkgName --with-ssl &> /dev/null
+    sureOK $? "pyConfigure"
+}
+#pass pyConfigure
+
+function pyMakeAndMakeInstall {
+    cd $downloadPath/$pyPkgName
+    echo "make python ...ing, please wait ..ing"
     make &> /dev/null
-    sure_ok $? "python- make"
-}
-# go_make
-
-go_make_install() {
-    cd $download_to/Python-${py_version}
-    echo "also need some time, please wait..."
+    sureOK $? "pyMake"
+    echo "make install python ...ing, please wait ..ing"
     make install &> /dev/null
-    sure_ok $? "python make install"
+    sureOK $? "pyMakeInstall"
 }
-# go_make_install
+#pass pyMakeAndMakeInstall
 
-create_soft_link() {
-    ln -s ${install_path}/Python-${py_version} ${install_path}/python
-    sure_ok $? "python create soft link"
+function pySoftLink {
+    ln -s $installPath/$pyPkgName $installPath/python
+    sureOK $? "pySoftLink"
 }
-# create_soft_link
+#pass pySoftLink
 
-go_add_path() {
-    linse_num=`sed -n '/export PATH=/=' $env_path`
-    [ -z "$linse_num" ] && {
-        echo "export PATH=\"$add_path:$PATH\"" >> $env_path
-        sure_ok $? "python add path"
+function pyGlobalEnv {
+    exportLineNum=`sed -n '/export PATH=/=' $globalPath`
+    [ -z "$exportLineNum" ] && {
+        echo "export PATH=\"$installPath/$pyBinPath:\$PATH\"" >> $globalPath
+        sureOK $? "pyGlobalEnv"
     } || {
-        change_data=$( echo `sed -n '/export PATH=/p' $env_path`| awk -F '[ "]' -v v=$add_path  '{print $1,$2"\""$2$3":"v"\""}')
-        sed -i "${linse_num}c $change_data" $env_path
-        . $env_path
-        sure_ok $? "python add path"
-    }   
+       middlePath= $(echo `sed -n '/export PATH=/p' $globalPath`| awk -F '[ "]' -v v=$installPath/$pyBinPath  '{print $1,$2"\""$2$3":"v"\""}')
+       echo $middlePath
+       sed -i "#exportLineNum s/.*/$middlePath/g" $globalPath
+       sureOK $? "pyGlobalEnv"
+    }
 }
-# go_add_path
+#pass pyGlobalEnv
 
-go_aliyun_pip(){
+function AliyunPipConf {
     [ -d $HOME/.pip ] || {
         mkdir $HOME/.pip -p
-        sure_ok $? "init .pip dir"
+        sureOK $? "init .pip dir"
     }
     cd $HOME/.pip
     echo -e "[global]\ntrusted-host=mirrors.aliyun.com\nindex-url=http://mirrors.aliyun.com/pypi/simple/" > pip.conf
-    sure_ok $? "python go aliyun pip"
+    sureOK $? "AliyunPipConf"
 }
-# go_aliyun_pip
+#pass AliyunPipConf
 
-go_install_vitualenv() {
-    . $env_path
-    pip3 install virtualenvwrapper >> /dev/null
-    sure_ok $? "python install virtualenv"
+function pyVitrualenvInstall {
+    . $globalPath
+    pip3 install $pyVirtualPkg &> /dev/null
+    sureOK $? "pyVitrualenvInstall"
 }
-# go_install_vitualenv
+#pass pyVitrualenvInstall
 
-go_setting_vitualenv() {
-    [ -d $vitrualenv_path ] || {
-        mkdir $vitrualenv_path -p
-        sure_ok $? "python mkdir $vitrualenv_path"
+function createPyVitrualenv {
+    [ -d $vitrualEnvPath ] || {
+        mkdir -p $vitrualEnvPath
+        sureOK $? "init vitrualEnvPath"
     }
-   cat>>$user_env_path<<jia
+    cat >>$userBashConf<<EOF
 export VIRTUALENV_USE_DISTRIBUTE=1
-export WORKON_HOME=$vitrualenv_path
-export VIRTUALENVWRAPPER_PYTHON=$add_path/python3
-if [ -e $add_path/virtualenvwrapper.sh ];then
-    source $add_path/virtualenvwrapper.sh
-fi
+export WORKON_HOME=$vitrualEnvPath
+export VIRTUALENVWRAPPER_PYTHON=$installPath/$pyBinPath
+. $installPath/$pyBinPath/virtualenvwrapper.sh
 export PIP_VIRTUALENV_BASE=\$WORKON_HOME
 export PIP_RESPECT_VIRTUALENV=true
-jia
-    sure_ok $? "python setting virtualenv"
+EOF
+    sureOK $? "createPyVitrualenv"
 }
-# go_setting_vitualenv
+#pass createPyVitrualenv
 
-person_virtualenv_alias() {
-    sed -i "9i # only want to easy use and read\n\
-# you also can set what you like\n\
-alias mkenv='mkvirtualenv'\n\
-alias rmenv='rmvirtualenv'\n\
-alias outenv='deactivate'" $user_env_path
-    sure_ok $? "python vituralenv person setting"
+function persionPyVirtualCmdAlias {
+    sed -i "9i alias mkenv='mkvirtualenv'\nalias rmenv='rmvirtualenv'\nalias outenv='deactivate'" $userBashConf
+    sureOK $? "persionPyVirtualCmdAlias"
 }
-# person_virtualenv_alais
+#pass persionPyVirtualCmdAlias
 
-beimenchuixue_main() {
-    install_yilai
-    down_python
-    jie_ya
-    go_configure
-    go_make
-    go_make_install
-    create_soft_link
-    go_add_path
-    go_aliyun_pip
-    go_install_vitualenv
-    go_setting_vitualenv
-    person_virtualenv_alias
+main_BeiMenChuiXue() {
+    pyRelayPkgInstall
+    downloadPyPkg
+    untarPyPkg
+    pyConfigure
+    pyMakeAndMakeInstall
+    pySoftLink
+    pyGlobalEnv
+    AliyunPipConf
+    pyVitrualenvInstall
+    persionPyVirtualCmdAlias
 }
-
-beimenchuixue_main
+main_BeiMenChuiXue
 
 # ^_^
