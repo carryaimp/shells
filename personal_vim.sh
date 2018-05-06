@@ -58,6 +58,7 @@ function sureOk {
         action "\$2 is"  /bin/true
     } || {
         action "\$2 is"  /bin/false
+        exit \$1
     }
 }
 EOF
